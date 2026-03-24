@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Server Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .animate-click {
+            animation: pulse-subtle 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-slate-800 h-screen w-full flex items-center justify-center m-0 overflow-hidden font-sans text-white antialiased">
+
+    <div class="flex flex-col items-center gap-6 w-full max-w-md px-6">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-white mb-2">VIP Server Checker</h1>
+            <p class="text-slate-400 text-sm">Paste your Roblox VIP link below</p>
+        </div>
+
+        <input 
+            type="url" 
+            id="linkInput" 
+            placeholder="https://www.roblox.com/share?code=..." 
+            class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 transition-all"
+        >
+
+        <button 
+            id="centerButton"
+            class="group relative w-full px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-lg font-semibold rounded-xl shadow-[0_0_40px_-10px_rgba(79,70,229,0.5)] hover:shadow-[0_0_60px_-15px_rgba(79,70,229,0.7)] transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 active:translate-y-0 active:shadow-md overflow-hidden"
+        >
+            <span id="buttonText" class="relative z-10 flex items-center justify-center gap-2">
+                Check Link
+                <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </span>
+            
+            <div class="absolute inset-0 h-full w-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+        </button>
+    </div>
+
+    <script>
+        const btn = document.getElementById('centerButton');
+        const btnTxt = document.getElementById('buttonText');
+        const input = document.getElementById('linkInput');
+
+        const defaultHtml = `
+            Check Link
+            <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        `;
+
+        btn.addEventListener('click', async () => {
+            const url = input.value.trim();
+            
+            if (!url) {
+                btnTxt.innerHTML = `<span class="text-red-300">Please enter a link!</span>`;
+                setTimeout(() => { btnTxt.innerHTML = defaultHtml; }, 2000);
+                return;
+            }
+
+            btn.classList.add('animate-click');
+            
+            btnTxt.innerHTML = `
+                <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Checking...
+            `;
+            
+            try {
+                const res = await fetch('http://localhost:3000/api/check-vip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+                
+                const data = await res.json();
+                btn.classList.remove('animate-click');
+                
+                if (data.isValid) {
+                    btnTxt.innerHTML = `<svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Valid Server!`;
+                } else {
+                    btnTxt.innerHTML = `<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Invalid Link`;
+                }
+            } catch (err) {
+                btnTxt.innerHTML = `<svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> Server Offline`;
+            }
+
+            setTimeout(() => {
+                btnTxt.innerHTML = defaultHtml;
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
