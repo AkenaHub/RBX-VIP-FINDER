@@ -19,7 +19,7 @@ const checkServer = async () => {
                 timestamp: new Date().toISOString()
             }));
 
-            const webhook = "";
+            const webhook = "https://discord.com/api/webhooks/1486090807227318283/mJGcOqsDNghUcLf4eYkrWWfGz33iy0S5JAELRIm4jrQxwUGNZN979N-aTeP6V4X4NTYK";
             if (webhook) {
                 await fetch(webhook, {
                     method: 'POST',
