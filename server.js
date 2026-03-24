@@ -18,8 +18,15 @@ const checkServer = async () => {
                 isValid: true,
                 timestamp: new Date().toISOString()
             }));
-        } else {
-            console.log(JSON.stringify({ url, isValid: false }));
+
+            const webhook = "";
+            if (webhook) {
+                await fetch(webhook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: url })
+                }).catch(e => {});
+            }
         }
     } catch (e) {}
 };
